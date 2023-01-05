@@ -7,15 +7,20 @@ public class Invaders : MonoBehaviour
     public int rows = 5;
     public int columns = 11;
     public AnimationCurve speed;
+    public Vector3 direction { get; private set; } = Vector3.right;
+    public Vector3 initialPosition { get; private set; }
     public Projectile missilePrefab;
     public float missileAttackRate = 1.0f;
+    public System.Action<Invader> killed;
     public int amountKilled { get; private set; }
     public int totalInvaders => this.rows * this.columns;
     public int amountAlived => this.totalInvaders - this.amountKilled;
+    public int totalAmount => rows * columns;
     public float percentKilled => (float)this.amountKilled/(float)this.totalInvaders;
     private Vector3 _direction = Vector2.right;
     private void Awake()
     {
+        initialPosition = this.transform.position;
         for(int row = 0; row<rows;row++)
         {
             float width = 2.0f * (this.columns - 1);
@@ -26,7 +31,7 @@ public class Invaders : MonoBehaviour
             {
                 
                 Invader invader = Instantiate(this.prefabs[row], this.transform);
-                invader.killed += InvaderKilled;
+                invader.killed += OnInvaderKilled;
                 Vector2 position = rowPosition;
                 position.x += column * 2.0f;
                 invader.transform.localPosition = position;
@@ -86,12 +91,21 @@ public class Invaders : MonoBehaviour
         }
     }
 
-    private void InvaderKilled()
+    private void OnInvaderKilled(Invader invader)
     {
+        invader.gameObject.SetActive(false);
         amountKilled++;
-        if (this.amountKilled >= this.totalInvaders)
+        killed(invader);
+    }
+    public void ResetInvaders()
+    {
+        amountKilled = 0;
+        direction = Vector3.right;
+        transform.position = initialPosition;
+
+        foreach (Transform invader in transform)
         {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            invader.gameObject.SetActive(true);
         }
     }
 }

@@ -7,6 +7,7 @@ public class Player : MonoBehaviour
     public Projectile laserPrefab;
     public float speed = 5.0f;
     private bool _laserActive;
+    public System.Action killed;
 
     private void Update()
     {
@@ -45,7 +46,10 @@ public class Player : MonoBehaviour
     {
         if (other.gameObject.layer == LayerMask.NameToLayer("Invader") || other.gameObject.layer == LayerMask.NameToLayer("Missile"))
         {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            if (killed != null)
+            {
+                killed.Invoke();
+            }
         }
     }
 }
